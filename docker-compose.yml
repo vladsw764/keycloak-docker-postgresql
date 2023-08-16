@@ -4,7 +4,7 @@ networks:
     driver: bridge
 
 volumes:
-  postgres-data-keycloak:
+  postgres_data_keycloak:
     driver: local
 
 services:
