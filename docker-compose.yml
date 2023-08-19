@@ -1,77 +1,49 @@
-networks:
-  backend:
-    name: keycloak-app
-    driver: bridge
-
-volumes:
-  postgres_data_keycloak:
-    driver: local
+version: '3.9'
 
 services:
-  # App service
-  app:
-    container_name: base-app-service
-    image: keycloak-test-app:latest
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    depends_on:
-      db:
-        condition: service_healthy
-      keycloak:
-        condition: service_started
-    ports:
-      - 8081:8080
-
   # DB service
   db:
-    image: postgres:15-alpine
+    image: postgres:14-alpine
     restart: always
-    container_name: app-db-service
-    volumes:
-      - postgres_data_keycloak:/var/lib/postgresql/data
-    networks:
-      - backend
     ports:
-      - 1234:5432
+      - "7676:5432"
     environment:
-      POSTGRES_DB: app-db
-      POSTGRES_USER: vladsw764
-      POSTGRES_PASSWORD: password
-    healthcheck:
-      test: "pg_isready -U postgres"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: test
 
   # Keycloak service
   keycloak:
-    image: keycloak/keycloak:22.0.1
-    container_name: keycloak-service
-    command:
-      - start-dev
+    image: quay.io/keycloak/keycloak:22.0.1
+    container_name: keycloak-authentication
+    command: start-dev
     ports:
-      - 8180:8080
-    networks:
-      - backend
+      - "8181:8080"
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: password
       KC_DB: postgres
-      KC_DB_URL_HOST: keycloak-db
-      KC_DB_URL_DATABASE: keycloak-db
+      KC_DB_URL_HOST: keycloak-database
+      KC_DB_URL_DATABASE: keycloak
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: password
       KC_HEALTH_ENABLED: true
     depends_on:
-      - keycloak-db
+      - keycloak-database
 
   # Keycloak DB service
-  keycloak-db:
-    image: postgres:15-alpine
-    volumes:
-      - postgres_data_keycloak:/var/lib/postgresql/data
-    container_name: keycloak-db
-    networks:
-      - backend
+  keycloak-database:
+    image: postgres:14-alpine
+    container_name: keycloak-database
+    ports:
+      - "54333:5432"
     environment:
-      POSTGRES_DB: keycloak-db
+      POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
+    volumes:
+      - keycloak-data:/var/lib/postgresql/data
+
+volumes:
+  keycloak-data:
+    driver: local
