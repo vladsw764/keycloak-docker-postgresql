@@ -1,0 +1,44 @@
+server:
+  port: 8081 # Map to the port you want to expose for your Spring Boot app
+
+spring:
+  config:
+    name: resource-server
+  # Datasource config
+  datasource:
+    url: jdbc:postgresql://localhost:7676/test # Map to your database configuration
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  # JPA config
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  # Security configs
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: bud-style-client
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:8181/oauth2/bud-style-client
+            scope:
+              - openid
+              - profile
+              - email
+        provider:
+          keycloak:
+            issuer-uri: http://127.0.0.1:8181/realms/bud-cooparation-realm
+      resource-server:
+        jwt:
+          issuer-uri: http://127.0.0.1:8181/realms/bud-cooparation-realm
+          jwk-set-uri: ${spring.security.oauth2.client.provider.keycloak.issuer-uri}/protocol/openid-connect/certs
+
+
+#Logging configs
+logging:
+  level:
+    org.springframework.security: DEBUG
