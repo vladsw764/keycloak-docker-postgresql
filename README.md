@@ -1,4 +1,4 @@
-# Project Name: Secure Spring Boot REST API with Keycloak and OAuth 2.0
+# Secure Spring Boot REST API with Keycloak and OAuth 2.0
 
 ## Description
 
